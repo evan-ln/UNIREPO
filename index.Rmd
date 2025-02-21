@@ -35,7 +35,7 @@ These tracks were created using **Stableaudio AI** ([Stableaudio](https://stable
 
 **Style:** Ambient, Post-Rock, Cinematic  
 **Length:** 2 minutes  
-**Goal:** A calm, meditative atmosphere with minimal instrumentation.  
+**Goal:** A calm, meditative ambient song with minimal instrumentation.  
 
 **Tags Used:**  
 Ambient, Post-Rock, Cinematic, Ethereal, Soothing, Meditative, Minimalist, Warm Subtle Bass, Deep Drones, Airy Pads, Textures, Analog Synths, Field Recordings, Wind Sounds, Reverb, **60 BPM**
@@ -45,9 +45,10 @@ Ambient, Post-Rock, Cinematic, Ethereal, Soothing, Meditative, Minimalist, Warm 
 ## **Track 2: Energetic Breakbeat Rave**
 
 **Track 2: Energetic Breakbeat Rave**
+
 **Style:** Breakbeat, Acid Breaks, 90s Rave  
 **Length:** 2 minutes  
-**Goal:** A high-energy, raw breakbeat track with a chaotic yet funky groove.  
+**Goal:** A high-energy, chaotic breakbeat track.  
 
 **Tags Used:**  
 Breakbeat, Acid Breaks, 90s Rave, Energetic, Raw, Funky, Chaotic, Breakbeats, Deep Bass, Distorted 808, Acid Bass, Filtered Chords, Reversed Pads, Vocal Chops, **135 BPM**
