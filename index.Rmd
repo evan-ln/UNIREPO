@@ -33,9 +33,10 @@ These tracks were created using **Stableaudio AI** ([Stableaudio](https://stable
 
 **Track 1: Meditative Ambient Soundscape**
 
+
 **Style:** Ambient, Post-Rock, Cinematic  
 **Length:** 2 minutes  
-**Goal:** A calm, meditative ambient song with minimal instrumentation.  
+**Goal:** A calm, meditative ambient with minimal instrumentation.  
 
 **Tags Used:**  
 Ambient, Post-Rock, Cinematic, Ethereal, Soothing, Meditative, Minimalist, Warm Subtle Bass, Deep Drones, Airy Pads, Textures, Analog Synths, Field Recordings, Wind Sounds, Reverb, **60 BPM**
@@ -45,6 +46,7 @@ Ambient, Post-Rock, Cinematic, Ethereal, Soothing, Meditative, Minimalist, Warm 
 ## **Track 2: Energetic Breakbeat Rave**
 
 **Track 2: Energetic Breakbeat Rave**
+
 
 **Style:** Breakbeat, Acid Breaks, 90s Rave  
 **Length:** 2 minutes  
