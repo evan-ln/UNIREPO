@@ -1,29 +1,105 @@
 ---
-title: "NewPortfolio"
-output: html_document
+title: "Music Data Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    storyboard: true
+    theme: "cosmo"
 date: "2025-02-21"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(plotly)
+library(readr)
+library(dplyr)
+
+# Load the dataset
+compmus_data <- read_csv("compmus2025.csv")
+
+# Define my tracks
+my_tracks <- c("evan-l-1", "evan-l-2")
 ```
 
-## R Markdown
+## Exploring Musical Properties - Version 1
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# My AI-Generated Tracks
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+These tracks were created using **Stableaudio AI** ([Stableaudio](https://stableaudio.com/generate)). I took inspiration from genre tags on **RateYourMusic** and carefully crafted prompts using detailed descriptors to shape the sound. After generating the tracks, I simply downloaded the MP3 files.
 
-```{r cars}
-summary(cars)
+---
+
+## **Track 1: Meditative Ambient Soundscape**
+
+**Track 1: Meditative Ambient Soundscape**
+
+**Style:** Ambient, Post-Rock, Cinematic  
+**Length:** 2 minutes  
+**Goal:** A calm, meditative atmosphere with minimal instrumentation.  
+
+**Tags Used:**  
+Ambient, Post-Rock, Cinematic, Ethereal, Soothing, Meditative, Minimalist, Warm Subtle Bass, Deep Drones, Airy Pads, Textures, Analog Synths, Field Recordings, Wind Sounds, Reverb, **60 BPM**
+
+---
+
+## **Track 2: Energetic Breakbeat Rave**
+
+**Track 2: Energetic Breakbeat Rave**
+**Style:** Breakbeat, Acid Breaks, 90s Rave  
+**Length:** 2 minutes  
+**Goal:** A high-energy, raw breakbeat track with a chaotic yet funky groove.  
+
+**Tags Used:**  
+Breakbeat, Acid Breaks, 90s Rave, Energetic, Raw, Funky, Chaotic, Breakbeats, Deep Bass, Distorted 808, Acid Bass, Filtered Chords, Reversed Pads, Vocal Chops, **135 BPM**
+
+---
+
+## **Creation Process**
+
+1. **Prompt Design:**  
+   - Used RateYourMusic to explore fitting **genre tags**.  
+   - Structured prompts with **specific instruments, moods, and BPM** to guide the AI.  
+2. **Generation:**  
+   - Entered prompts into **Stableaudio AI**.  
+   - Experimented with variations before selecting the best versions.  
+3. **Finalization:**  
+   - Downloaded the **MP3 files** and ensured they matched my vision.  
+
+---
+
+# Visualization
+
+Here's a scatterplot of the Danceability compared to the Tempo of the tracks. My track 1 (ambient) is marked red, track 2 (breakbeat) is blue.
+
+
+```{r danceability_plot, echo=FALSE}
+dance_plot <- ggplot(compmus_data, aes(x = danceability, y = tempo)) +
+  geom_point(alpha = 0.6, size = 3, color = "grey") +  
+  geom_point(data = compmus_data %>% filter(filename == "evan-l-1"), 
+             aes(x = danceability, y = tempo), color = "red", size = 3) +
+  geom_point(data = compmus_data %>% filter(filename == "evan-l-2"), 
+             aes(x = danceability, y = tempo), color = "blue", size = 3) +
+  labs(title = "Danceability vs. Tempo",
+       x = "Danceability",
+       y = "Tempo") +
+  theme_classic()
+
+ggplotly(dance_plot)
 ```
 
-## Including Plots
+---
 
-You can also embed plots, for example:
+# Final Thoughts
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+**Findings and Final Thoughts**
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+There appears to be no set correlation between the danceability and tempo of the tracks. However, an interesting pattern emerges: there are two clusters—one with low danceability, and another with high danceability, while the tempo does not differ much
+
+Regarding my own tracks:
+
+- The **calm ambient track** has an average tempo and low danceability.
+
+- The **breakbeat song** has an average tempo but high danceability.
+
+One particularly surprising observation is how the AI interpreted the second song’s tempo. While I set it to **135 BPM**, it was classified as **93 BPM**. This suggests that the AI might have emphasized a different rhythmic structure or half-time feel in its classification.
+

@@ -1,0 +1,36 @@
+# My AI-Generated Tracks
+
+## Overview
+These tracks were created using **Stableaudio AI** ([Stableaudio](https://stableaudio.com/generate)). I took inspiration from genre tags on **RateYourMusic** and carefully crafted prompts using detailed descriptors to shape the sound. After generating the tracks, I simply downloaded the MP3 files.
+
+---
+
+## Track 1: Meditative Ambient Soundscape
+**Style:** Ambient, Post-Rock, Cinematic  
+**Length:** 2 minutes  
+**Goal:** A calm, meditative atmosphere with minimal instrumentation.  
+
+**Tags Used:**  
+Ambient, Post-Rock, Cinematic, Ethereal, Soothing, Meditative, Minimalist, Warm Subtle Bass, Deep Drones, Airy Pads, Textures, Analog Synths, Field Recordings, Wind Sounds, Reverb, **60 BPM**
+
+---
+
+## Track 2: Energetic Breakbeat Rave
+**Style:** Breakbeat, Acid Breaks, 90s Rave  
+**Length:** 2 minutes  
+**Goal:** A high-energy, raw breakbeat track with a chaotic yet funky groove.  
+
+**Tags Used:**  
+Breakbeat, Acid Breaks, 90s Rave, Energetic, Raw, Funky, Chaotic, Breakbeats, Deep Bass, Distorted 808, Acid Bass, Filtered Chords, Reversed Pads, Vocal Chops, **135 BPM**
+
+---
+
+## Creation Process
+1. **Prompt Design:**  
+   - Used RateYourMusic to explore fitting **genre tags**.  
+   - Structured prompts with **specific instruments, moods, and BPM** to guide the AI.  
+2. **Generation:**  
+   - Entered prompts into **Stableaudio AI**.  
+   - Experimented with variations before selecting the best versions.  
+3. **Finalization:**  
+   - Downloaded the **MP3 files** and ensured they matched my vision.  
