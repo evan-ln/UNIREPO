@@ -112,9 +112,9 @@ image(ssm_timbre_2, main = "Timbre SSM - Evan-l-2.wav", col = gray.colors(100))
 
 ---
 
-## Exploring Musical Properties - Version 2
+# Exploring Musical Properties - Version 2
 
-# My AI-Generated Tracks
+## My AI-Generated Tracks
 
 These tracks were created using **Stableaudio AI** ([Stableaudio](https://stableaudio.com/generate)). I took inspiration from genre tags on **RateYourMusic** and carefully crafted prompts using detailed descriptors to shape the sound. After generating the tracks, I simply downloaded the MP3 files.
 
