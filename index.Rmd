@@ -13,6 +13,18 @@ library(ggplot2)
 library(plotly)
 library(readr)
 library(dplyr)
+library(tuneR)
+library(seewave)
+library(av)
+
+# Install required packages (if not already installed)
+if (!requireNamespace("tuneR", quietly = TRUE)) install.packages("tuneR")
+if (!requireNamespace("seewave", quietly = TRUE)) install.packages("seewave")
+if (!requireNamespace("av", quietly = TRUE)) install.packages("av")
+
+# Convert MP3 to WAV
+av_audio_convert("evan-l-1.mp3", "evan-l-1.wav", format = "wav")
+av_audio_convert("evan-l-2.mp3", "evan-l-2.wav", format = "wav")
 
 # Load the dataset
 compmus_data <- read_csv("compmus2025.csv")
@@ -21,7 +33,88 @@ compmus_data <- read_csv("compmus2025.csv")
 my_tracks <- c("evan-l-1", "evan-l-2")
 ```
 
-## Exploring Musical Properties - Version 1
+## Chroma Features
+
+### Chromagrams for own tracks
+
+Chromagrams capture the harmonic content by showing how energy is distributed across the 12 pitch classes (C, C#, D, etc.) over time.
+
+```{r chromagrams, echo=FALSE}
+plot_chromagram <- function(file) {
+  wave <- readWave(file)
+  spectro(wave, wl = 1024, ovlp = 75, collevels = seq(-50, 0, 5), main = paste("Chromagram -", file))
+}
+
+par(mfrow = c(2,1))
+plot_chromagram("evan-l-1.wav")
+plot_chromagram("evan-l-2.wav")
+par(mfrow = c(1,1))  # Reset
+
+```
+
+#### Chromagrams
+
+- **Evan-l-1.wav - Ambient **
+  - The energy is mainly in the lower frequency range, below ~5 kHz
+  - The overall amplitude is low, this reflects the quiet ambient sounds
+  - The minimal structure suggests an ambient or instrumental track
+
+- **Evan-l-2.wav - Breakbeat **
+  - Covers a much wider frequency range, reaching beyond 10 kHz, with distinct variations in energy
+  - Brighter colors indicate stronger amplitude, due to the track being comparatively dynamic
+  - The structure implies prominent rhythmic and melodic elements, as is the case with my breakbeat track
+
+---
+
+## Self-Similarity Matrices
+
+
+```{r self_similarity, echo=FALSE}
+compute_ssm <- function(file, feature = "chroma") {
+  wave <- readWave(file)
+  
+  # Extract the signal
+  signal <- wave@left  # Use left channel if stereo
+  sr <- wave@samp.rate  # Get sample rate
+  
+  if (feature == "chroma") {
+    chroma <- melfcc(wave, numcep = 12)  # No `$cep`
+    dist_matrix <- as.matrix(dist(t(chroma)))  # Convert to self-similarity matrix
+  } else if (feature == "timbre") {
+    timbre <- melfcc(wave, numcep = 20)
+    dist_matrix <- as.matrix(dist(t(timbre)))
+  }
+  
+  return(dist_matrix)
+}
+
+
+
+ssm_chroma_1 <- compute_ssm("evan-l-1.wav", feature = "chroma")
+ssm_timbre_1 <- compute_ssm("evan-l-1.wav", feature = "timbre")
+ssm_chroma_2 <- compute_ssm("evan-l-2.wav", feature = "chroma")
+ssm_timbre_2 <- compute_ssm("evan-l-2.wav", feature = "timbre")
+
+par(mfrow = c(2,2))
+image(ssm_chroma_1, main = "Chroma SSM - Evan-l-1.wav", col = gray.colors(100))
+image(ssm_timbre_1, main = "Timbre SSM - Evan-l-1.wav", col = gray.colors(100))
+image(ssm_chroma_2, main = "Chroma SSM - Evan-l-2.wav", col = gray.colors(100))
+image(ssm_timbre_2, main = "Timbre SSM - Evan-l-2.wav", col = gray.colors(100))
+```
+
+### SSMs
+
+- **Evan-l-1.wav - Ambient**
+  - The chroma-SSM shows some variation, but overall pretty uniform and repetitive
+  - The timbre-SSM is mostly smooth and table
+
+- **Evan-l-2.wav - Breakbeat**
+  - The chroma-SSM has more distinct patterns, like a checkerboard. The song has stronger harmonic changes with varied chord progressions.
+  - The timbre-SSM shows greater shifts in instruments or timbres
+
+---
+
+## Exploring Musical Properties - Version 2
 
 # My AI-Generated Tracks
 
@@ -32,7 +125,6 @@ These tracks were created using **Stableaudio AI** ([Stableaudio](https://stable
 ## **Track 1: Meditative Ambient Soundscape**
 
 **Track 1: Meditative Ambient Soundscape**
-
 
 **Style:** Ambient, Post-Rock, Cinematic  
 **Length:** 2 minutes  
@@ -46,7 +138,6 @@ Ambient, Post-Rock, Cinematic, Ethereal, Soothing, Meditative, Minimalist, Warm 
 ## **Track 2: Energetic Breakbeat Rave**
 
 **Track 2: Energetic Breakbeat Rave**
-
 
 **Style:** Breakbeat, Acid Breaks, 90s Rave  
 **Length:** 2 minutes  
@@ -74,20 +165,21 @@ Breakbeat, Acid Breaks, 90s Rave, Energetic, Raw, Funky, Chaotic, Breakbeats, De
 
 Here's a scatterplot of the Danceability compared to the Tempo of the tracks. My track 1 (ambient) is marked red, track 2 (breakbeat) is blue.
 
-
-```{r danceability_plot, echo=FALSE}
-dance_plot <- ggplot(compmus_data, aes(x = danceability, y = tempo)) +
-  geom_point(alpha = 0.6, size = 3, color = "grey") +  
+```{r danceability_plot, echo=FALSE, fig.width=6, fig.height=4}
+dance_plot <- ggplot(compmus_data, aes(x = danceability, y = tempo, color = danceability, text = filename)) +
+  geom_point(alpha = 0.6, size = 2) +  
   geom_point(data = compmus_data %>% filter(filename == "evan-l-1"), 
-             aes(x = danceability, y = tempo), color = "red", size = 3) +
+             aes(x = danceability, y = tempo, text = filename), color = "red", size = 2.5) +
   geom_point(data = compmus_data %>% filter(filename == "evan-l-2"), 
-             aes(x = danceability, y = tempo), color = "blue", size = 3) +
+             aes(x = danceability, y = tempo, text = filename), color = "blue", size = 2.5) +
   labs(title = "Danceability vs. Tempo",
        x = "Danceability",
-       y = "Tempo") +
+       y = "Tempo",
+       color = "Danceability") +
   theme_classic()
 
-ggplotly(dance_plot)
+# Adjust plot size + hover tooltips show song titles
+ggplotly(dance_plot, tooltip = "text")
 ```
 
 ---
@@ -96,13 +188,11 @@ ggplotly(dance_plot)
 
 **Findings and Final Thoughts**
 
-There appears to be no set correlation between the danceability and tempo of the tracks. However, an interesting pattern emerges: there are two clusters—one with low danceability, and another with high danceability, while the tempo does not differ much
+There appears to be no set correlation between the danceability and tempo of the tracks. However, an interesting pattern emerges: there are two clusters—one with low danceability, and another with high danceability, while the tempo does not differ much.
 
 Regarding my own tracks:
 
 - The **calm ambient track** has an average tempo and low danceability.
-
 - The **breakbeat song** has an average tempo but high danceability.
 
 One particularly surprising observation is how the AI interpreted the second song’s tempo. While I set it to **135 BPM**, it was classified as **93 BPM**. This suggests that the AI might have emphasized a different rhythmic structure or half-time feel in its classification.
-
