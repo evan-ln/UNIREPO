@@ -48,8 +48,6 @@ plot_chromagram <- function(file) {
 par(mfrow = c(2,1))
 plot_chromagram("evan-l-1.wav")
 plot_chromagram("evan-l-2.wav")
-par(mfrow = c(1,1))  # Reset
-
 ```
 
 #### Chromagrams
