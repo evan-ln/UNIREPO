@@ -2,11 +2,9 @@
 title: "Music Data Dashboard"
 output: 
   flexdashboard::flex_dashboard:
-    storyboard: true
     theme: "cosmo"
 date: "2025-02-28"
 ---
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -34,18 +32,19 @@ compmus_data <- read_csv("compmus2025.csv")
 my_tracks <- c("evan-l-1", "evan-l-2")
 ```
 
-# Exploring Musical Properties - Version 2
+
+
+# Overview
+
+This dashboard explores the musical properties of my AI-generated tracks using chromagrams, self-similarity matrices, and danceability analysis.
+
+
 
 ---
-
 
 ## Chromagram
 
 ### Chromagrams for own tracks
-
-
-**!!! I currently keep having issues with my chromagrams not loading (though they do show in R), so it may be that they don't show up yet. Trying to fix this ASAP.**
-
 
 Chromagrams capture the harmonic content by showing how energy is distributed across the 12 pitch classes over time.
 
@@ -60,22 +59,9 @@ plot_chromagram("evan-l-1.wav")
 plot_chromagram("evan-l-2.wav")
 ```
 
-#### Chromagrams
-
-- **Evan-l-1.wav - Ambient **
-  - The energy is mainly in the lower frequency range, below ~5 kHz
-  - The overall amplitude is low, this reflects the quiet ambient sounds
-  - The minimal structure suggests an ambient or instrumental track
-
-- **Evan-l-2.wav - Breakbeat **
-  - Covers a much wider frequency range, reaching beyond 10 kHz, with distinct variations in energy
-  - Brighter colors indicate stronger amplitude, due to the track being comparatively dynamic
-  - The structure implies prominent rhythmic and melodic elements, as is the case with my breakbeat track
-
 ---
 
-### Self-Similarity Matrices
-
+## Self-Similarity Matrices
 
 ```{r self_similarity, echo=FALSE}
 compute_ssm <- function(file, feature = "chroma") {
@@ -96,8 +82,6 @@ compute_ssm <- function(file, feature = "chroma") {
   return(dist_matrix)
 }
 
-
-
 ssm_chroma_1 <- compute_ssm("evan-l-1.wav", feature = "chroma")
 ssm_timbre_1 <- compute_ssm("evan-l-1.wav", feature = "timbre")
 ssm_chroma_2 <- compute_ssm("evan-l-2.wav", feature = "chroma")
@@ -112,61 +96,21 @@ image(ssm_timbre_2, main = "Timbre SSM - Evan-l-2.wav", col = gray.colors(100))
 
 ---
 
-### SSMs
-
-- **Evan-l-1.wav - Ambient**
-  - The chroma-SSM shows some variation, but overall pretty uniform and repetitive
-  - The timbre-SSM is mostly smooth and table
-
-- **Evan-l-2.wav - Breakbeat**
-  - The chroma-SSM has more distinct patterns, like a checkerboard. The song has stronger harmonic changes with varied chord progressions.
-  - The timbre-SSM shows greater shifts in instruments or timbres
-
----
-
-
-## My AI-Generated Tracks
+## AI-Generated Tracks
 
 These tracks were created using **Stableaudio AI** ([Stableaudio](https://stableaudio.com/generate)). I took inspiration from genre tags on **RateYourMusic** and carefully crafted prompts using detailed descriptors to shape the sound. After generating the tracks, I simply downloaded the MP3 files.
 
----
-
 ### **Track 1: Meditative Ambient Soundscape**
-
-**Track 1: Meditative Ambient Soundscape**
 
 **Style:** Ambient, Post-Rock, Cinematic  
 **Length:** 2 minutes  
 **Goal:** A calm, meditative ambient with minimal instrumentation.  
 
-**Tags Used:**  
-Ambient, Post-Rock, Cinematic, Ethereal, Soothing, Meditative, Minimalist, Warm Subtle Bass, Deep Drones, Airy Pads, Textures, Analog Synths, Field Recordings, Wind Sounds, Reverb, **60 BPM**
-
----
-
 ### **Track 2: Energetic Breakbeat Rave**
-
-**Track 2: Energetic Breakbeat Rave**
 
 **Style:** Breakbeat, Acid Breaks, 90s Rave  
 **Length:** 2 minutes  
 **Goal:** A high-energy, chaotic breakbeat track.  
-
-**Tags Used:**  
-Breakbeat, Acid Breaks, 90s Rave, Energetic, Raw, Funky, Chaotic, Breakbeats, Deep Bass, Distorted 808, Acid Bass, Filtered Chords, Reversed Pads, Vocal Chops, **135 BPM**
-
----
-
-### **Creation Process**
-
-1. **Prompt Design:**  
-   - Used RateYourMusic to explore fitting **genre tags**.  
-   - Structured prompts with **specific instruments, moods, and BPM** to guide the AI.  
-2. **Generation:**  
-   - Entered prompts into **Stableaudio AI**.  
-   - Experimented with variations before selecting the best versions.  
-3. **Finalization:**  
-   - Downloaded the **MP3 files** and ensured they matched my vision.  
 
 ---
 
@@ -194,8 +138,6 @@ ggplotly(dance_plot, tooltip = "text")
 ---
 
 ## Final Thoughts
-
-**Findings and Final Thoughts**
 
 There appears to be no set correlation between the danceability and tempo of the tracks. However, an interesting pattern emerges: there are two clusters—one with low danceability, and another with high danceability, while the tempo does not differ much.
 
