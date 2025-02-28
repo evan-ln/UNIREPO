@@ -34,7 +34,7 @@ my_tracks <- c("evan-l-1", "evan-l-2")
 
 
 
-# Overview
+Overview
 
 This dashboard explores the musical properties of my AI-generated tracks using chromagrams, self-similarity matrices, and danceability analysis.
 
@@ -42,17 +42,22 @@ This dashboard explores the musical properties of my AI-generated tracks using c
 
 ---
 
-## Chromagram
+# Chromagram
 
-### Chromagrams for own tracks
+## Chromagrams for own tracks
+
+**!!! I currently keep having issues with my chromagrams not loading (though they do show in R), so it may be that they don't show up yet. Trying to fix this ASAP.**
+
 
 Chromagrams capture the harmonic content by showing how energy is distributed across the 12 pitch classes over time.
 
 ```{r chromagrams, echo=FALSE}
 plot_chromagram <- function(file) {
   wave <- readWave(file)
+  dev.new()  # Open a new graphics device
   spectro(wave, wl = 1024, ovlp = 75, collevels = seq(-50, 0, 5), main = paste("Chromagram -", file))
 }
+
 
 par(mfrow = c(2,1))
 plot_chromagram("evan-l-1.wav")
@@ -96,7 +101,7 @@ image(ssm_timbre_2, main = "Timbre SSM - Evan-l-2.wav", col = gray.colors(100))
 
 ---
 
-## AI-Generated Tracks
+# AI-Generated Tracks
 
 These tracks were created using **Stableaudio AI** ([Stableaudio](https://stableaudio.com/generate)). I took inspiration from genre tags on **RateYourMusic** and carefully crafted prompts using detailed descriptors to shape the sound. After generating the tracks, I simply downloaded the MP3 files.
 
@@ -114,7 +119,7 @@ These tracks were created using **Stableaudio AI** ([Stableaudio](https://stable
 
 ---
 
-## Visualization
+# Visualization
 
 Here's a scatterplot of the Danceability compared to the Tempo of the tracks. My track 1 (ambient) is marked red, track 2 (breakbeat) is blue.
 
@@ -137,7 +142,7 @@ ggplotly(dance_plot, tooltip = "text")
 
 ---
 
-## Final Thoughts
+# Final Thoughts
 
 There appears to be no set correlation between the danceability and tempo of the tracks. However, an interesting pattern emerges: there are two clusters—one with low danceability, and another with high danceability, while the tempo does not differ much.
 
