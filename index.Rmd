@@ -47,9 +47,10 @@ Dash Version 2.0
 Chromagrams capture the harmonic content by showing how energy is distributed across the 12 pitch classes over time.
 
 ```{r chromagrams, echo=FALSE}
+#currently has issues loading.. why?
 plot_chromagram <- function(file) {
   wave <- readWave(file)
-  dev.new()  # Open a new graphics device
+  dev.new()  # To open a new graphic
   spectro(wave, wl = 1024, ovlp = 75, collevels = seq(-50, 0, 5), main = paste("Chromagram -", file))
 }
 
@@ -76,7 +77,7 @@ compute_ssm <- function(file, feature = "chroma") {
   wave <- readWave(file)
   
   # Extract the signal
-  signal <- wave@left  # Use left channel if stereo
+  signal <- wave@left 
   sr <- wave@samp.rate  # Get sample rate
   
   if (feature == "chroma") {
