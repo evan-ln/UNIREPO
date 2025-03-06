@@ -3,8 +3,12 @@ title: "Music Data Dashboard"
 output: 
   flexdashboard::flex_dashboard:
     theme: "cosmo"
-date: "2025-02-28"
+date: "2025-06-03"
 ---
+
+
+
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -15,6 +19,10 @@ library(dplyr)
 library(tuneR)
 library(seewave)
 library(av)
+library(tidyverse)
+
+source("compmus.R")
+
 
 # Install required packages (if not already installed)
 if (!requireNamespace("tuneR", quietly = TRUE)) install.packages("tuneR")
@@ -26,16 +34,19 @@ av_audio_convert("evan-l-1.mp3", "evan-l-1.wav", format = "wav")
 av_audio_convert("evan-l-2.mp3", "evan-l-2.wav", format = "wav")
 
 # Load the dataset
-compmus_data <- read_csv("compmus2025.csv")
+compmus_data <- read_csv("compmus.R")
 
-# Define my tracks
+# My tracks
 my_tracks <- c("evan-l-1", "evan-l-2")
+
+
 ```
+source("compmus.R")
 
-
-Dash Version 2.0
+Dash Version 3.0
 
 ---
+
 
 # Chromagram
 
@@ -48,6 +59,12 @@ Chromagrams capture the harmonic content by showing how energy is distributed ac
 
 ```{r chromagrams, echo=FALSE}
 #currently has issues loading.. why?
+
+
+#change up the compmus file + add from tutorial
+
+
+
 plot_chromagram <- function(file) {
   wave <- readWave(file)
   dev.new()  # To open a new graphic
@@ -166,10 +183,12 @@ dance_plot <- ggplot(compmus_data, aes(x = danceability, y = tempo, color = danc
              aes(x = danceability, y = tempo, text = filename), color = "red", size = 2.5) +
   geom_point(data = compmus_data %>% filter(filename == "evan-l-2"), 
              aes(x = danceability, y = tempo, text = filename), color = "blue", size = 2.5) +
+  
   labs(title = "Danceability vs. Tempo",
        x = "Danceability",
        y = "Tempo",
        color = "Danceability") +
+  
   theme_classic()
 
 # Adjust plot size + hover tooltips show song titles
