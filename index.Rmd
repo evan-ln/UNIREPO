@@ -3,12 +3,8 @@ title: "Music Data Dashboard"
 output: 
   flexdashboard::flex_dashboard:
     theme: "cosmo"
-date: "2025-06-03"
+date: "2025-14-03"
 ---
-
-
-
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -21,8 +17,6 @@ library(seewave)
 library(av)
 library(tidyverse)
 
-source("compmus.R")
-
 
 # Install required packages (if not already installed)
 if (!requireNamespace("tuneR", quietly = TRUE)) install.packages("tuneR")
@@ -33,17 +27,129 @@ if (!requireNamespace("av", quietly = TRUE)) install.packages("av")
 av_audio_convert("evan-l-1.mp3", "evan-l-1.wav", format = "wav")
 av_audio_convert("evan-l-2.mp3", "evan-l-2.wav", format = "wav")
 
+
+# Set feature directory
+features_dir <- 'features'
+
+# Source
+source('compmus.R')
+
 # Load the dataset
-compmus_data <- read_csv("compmus.R")
+compmus_data <- read_csv("compmus2025.csv")
 
 # My tracks
 my_tracks <- c("evan-l-1", "evan-l-2")
+json_my_tracks <- c("features/evan-l-1.json", "features/evan-l-2.json")
+
+```
+
+Dash Version 3.0
+---
+
+ISSUES:
+- can't download the low-level features
+
+
+# Tempo Analysis
+
+
+## Histogram for tempo class corpus
+```{r tempo_analysis, echo=FALSE}
+# Histogram of tempo for the class corpus
+plotly::ggplotly(
+compmus_data %>%
+  ggplot(aes(x = tempo)) +
+  geom_histogram(binwidth = 5, fill = "blue", color = "black") +
+  theme_minimal() +
+  labs(title = "Histogram of Tempo - Class", x = "Tempo (BPM)", y = "Count")
+)
+```
+From the histogram, we can see that the most frequent tempo (mode) in the class corpus is 85 BPM, with a count of 16.
+
+85 BPM is relatively slow and could correspond to genres like hip-hop, downtempo electronic, or ballads.It also corresponds with the human heartbeat, which could explain a natural preference. The data displays several smaller peaks, this could hint at clusters of similar music.
+
+
+---
+
+
+## Chordograms for own songs
+
+```{r tempograms, echo=FALSE}
+# Generate tempograms for user contributions
+for (track in json_my_tracks) {
+  tempogram <- tryCatch({
+    compmus_tempogram(track, window_size = 8, hop_size = 1, cyclic = FALSE)
+  }, error = function(e) {
+    message(paste("Error processing file:", track))
+    return(NULL)
+  })
+  
+  if (!is.null(tempogram)) {
+    print(
+      ggplot(tempogram, aes(x = time, y = bpm, fill = power)) +
+        geom_raster() +
+        scale_fill_viridis_c(guide = "none") +
+        labs(title = paste("Tempogram of", track), x = "Time (s)", y = "Tempo (BPM)") +
+        theme_classic()
+    )
+  }
+}
+```
+Track 1: The first track, which is the ambient track, appears pretty uniform, smooth and continuous until the second minute, where it gets progressively broken up. This could be due to some subtle changes in the sound layers, while the song lacks a strong beat (as is often the case for ambient music).
+
+Track 2: The second track, which is the breakbeat track, displays multiple evenly spaced lines. There is little variation visible aside from a small bridge, as the track mostly has a repetitive beat.
+
+
+
+
+---
+
+
+# Chordogram - 
+
+```{r chordograms, echo=FALSE}
+
+# Load the chroma.r file where the keys and other components are defined
+
+# Function to create the keygram plot (keys on the Y-axis)
+create_keygram <- function(file) {
+  # Process the audio file with chroma and match pitch templates for key estimation
+  chroma <- tryCatch({
+    compmus_chroma(file, norm = "identity")
+  }, error = function(e) {
+    print(paste("Error processing file:", file))
+    return(NULL)
+  })
+  
+  # If chroma extraction fails, return
+  if (is.null(chroma)) return(NULL)
+  
+  # Match chroma data to key templates
+  keygram <- compmus_match_pitch_templates(
+    chroma,            # Chroma data
+    key_templates,     # Key templates (already loaded from chroma.r)
+    norm = "identity", # Normalization setting
+    distance = "cosine" # Distance metric for matching
+  )
+  
+  # Plot the keygram with keys on the Y-axis
+  ggplot(keygram, aes(x = time, y = name, fill = d)) + 
+    geom_raster() + 
+    scale_fill_viridis_c(guide = "none") +  # Color scale
+    labs(x = "Time (s)", y = "Key", fill = NULL) +
+    theme_classic() +  # Clean theme
+    ggtitle(paste("Keygram of", file)) +    # Title for the plot
+    theme(plot.title = element_text(size = 12))  # Adjust title size
+}
+
+#doesn't work???
+par(mfrow = c(2, 1))  # Display side-by-side
+create_keygram("evan-l-1.wav")  # Keygram for the first track
+create_keygram("evan-l-2.wav")  # Keygram for the second track
 
 
 ```
-source("compmus.R")
 
-Dash Version 3.0
 
 ---
 
@@ -60,10 +166,9 @@ Chromagrams capture the harmonic content by showing how energy is distributed ac
 ```{r chromagrams, echo=FALSE}
 #currently has issues loading.. why?
 
+compmus_chroma()
 
 #change up the compmus file + add from tutorial
-
-
 
 plot_chromagram <- function(file) {
   wave <- readWave(file)
