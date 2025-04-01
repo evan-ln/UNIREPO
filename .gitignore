@@ -4,3 +4,5 @@
 .Ruserdata
 compmus2025.csv
 features/
+*.wav
+*.mp3
