@@ -337,7 +337,7 @@ ssm_timbre_2 <- compute_ssm("evan-l-2.wav", "timbre")
 
 ---
 
-### SSMs
+## SSMs
 <img src="SSM.png" alt="SSM image" width="400px" style="margin-bottom: 10px;"/>
 ---
 
