@@ -338,37 +338,7 @@ ssm_timbre_2 <- compute_ssm("evan-l-2.wav", "timbre")
 ---
 
 ### SSMs
-```{r ssm_chroma_1, echo=FALSE, fig.width=6, fig.height=6}
-# Chroma SSM – Ambient Track
-wave1 <- readWave("evan-l-1.wav")
-chroma1 <- melfcc(wave1, numcep = 12)
-ssm_chroma_1 <- as.matrix(dist(t(chroma1)))
-image(ssm_chroma_1, main = "Chroma SSM - Evan-l-1.wav", col = gray.colors(100))
-```
-
-```{r ssm_timbre_1, echo=FALSE, fig.width=6, fig.height=6}
-# Timbre SSM – Ambient Track
-wave1 <- readWave("evan-l-1.wav")
-timbre1 <- melfcc(wave1, numcep = 20)
-ssm_timbre_1 <- as.matrix(dist(t(timbre1)))
-image(ssm_timbre_1, main = "Timbre SSM - Evan-l-1.wav", col = gray.colors(100))
-```
-
-```{r ssm_chroma_2, echo=FALSE, fig.width=6, fig.height=6}
-# Chroma SSM – Breakbeat Track
-wave2 <- readWave("evan-l-2.wav")
-chroma2 <- melfcc(wave2, numcep = 12)
-ssm_chroma_2 <- as.matrix(dist(t(chroma2)))
-image(ssm_chroma_2, main = "Chroma SSM - Evan-l-2.wav", col = gray.colors(100))
-```
-
-```{r ssm_timbre_2, echo=FALSE, fig.width=6, fig.height=6}
-# Timbre SSM – Breakbeat Track
-wave2 <- readWave("evan-l-2.wav")
-timbre2 <- melfcc(wave2, numcep = 20)
-ssm_timbre_2 <- as.matrix(dist(t(timbre2)))
-image(ssm_timbre_2, main = "Timbre SSM - Evan-l-2.wav", col = gray.colors(100))
-```
+<img src="SSM.png" alt="SSM image" width="400px" style="margin-bottom: 10px;"/>
 ---
 
 ### SSM Interpretation
