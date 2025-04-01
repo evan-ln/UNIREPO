@@ -3,112 +3,171 @@ title: "Music Data Dashboard"
 output: 
   flexdashboard::flex_dashboard:
     theme: "cosmo"
-date: "2025-14-03"
----
+date: "2025-03-30"
 
+---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
+library(flexdashboard)
 library(plotly)
 library(readr)
 library(dplyr)
-library(tuneR)
-library(seewave)
-library(av)
+
+library(tuneR) # used for the readWave() function
+library(seewave) # used for spectro()
+library(av) # used for av_audio_convert()
+
 library(tidyverse)
+library(tidymodels)
+library(ggdendro)
+library(heatmaply)
 
-
-# Install required packages (if not already installed)
-if (!requireNamespace("tuneR", quietly = TRUE)) install.packages("tuneR")
-if (!requireNamespace("seewave", quietly = TRUE)) install.packages("seewave")
-if (!requireNamespace("av", quietly = TRUE)) install.packages("av")
-
-# Convert MP3 to WAV
+#mp3 to wav conversion
 av_audio_convert("evan-l-1.mp3", "evan-l-1.wav", format = "wav")
 av_audio_convert("evan-l-2.mp3", "evan-l-2.wav", format = "wav")
 
 
-# Set feature directory
-features_dir <- 'features'
-
-# Source
 source('compmus.R')
 
-# Load the dataset
 compmus_data <- read_csv("compmus2025.csv")
 
-# My tracks
+chord_templates <- tribble(
+  ~name, ~template,
+  "C", c(1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0),
+  "C#", c(0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0),
+  "D", c(0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0),
+  "D#", c(0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0),
+  "E", c(0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1),
+  "F", c(1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0),
+  "F#", c(0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0),
+  "G", c(0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1),
+  "G#", c(1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0),
+  "A", c(0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0),
+  "A#", c(0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0),
+  "B", c(0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1)
+)
+
+
+#own tracks
 my_tracks <- c("evan-l-1", "evan-l-2")
 json_my_tracks <- c("features/evan-l-1.json", "features/evan-l-2.json")
-
 ```
-
-Dash Version 4.0
----
-
-
-
-# Tempo Analysis
-
-
-## Histogram for tempo class corpus
-```{r tempo_analysis, echo=FALSE}
-# Histogram of tempo for the class corpus
-plotly::ggplotly(
-compmus_data %>%
-  ggplot(aes(x = tempo)) +
-  geom_histogram(binwidth = 5, fill = "blue", color = "black") +
-  theme_minimal() +
-  labs(title = "Histogram of Tempo - Class", x = "Tempo (BPM)", y = "Count")
-)
-```
-From the histogram, we can see that the most frequent tempo (mode) in the class corpus is 85 BPM, with a count of 16.
-
-85 BPM is relatively slow and could correspond to genres like hip-hop, downtempo electronic, or ballads.It also corresponds with the human heartbeat, which could explain a natural preference. The data displays several smaller peaks, this could hint at clusters of similar music.
-
 
 ---
 
+My CompMus Portfolio - Exploring Mood in AI-Generated Tracks
+============================================================
 
-## Chordograms for own songs
+# Introduction
 
-```{r tempograms, echo=FALSE}
-# Generate tempograms for user contributions
-for (track in json_my_tracks) {
-  tempogram <- tryCatch({
-    compmus_tempogram(track, window_size = 8, hop_size = 1, cyclic = FALSE)
-  }, error = function(e) {
-    message(paste("Error processing file:", track))
-    return(NULL)
-  })
+## Background & Track Selection
+
+This dashboard presents a comparative analysis of two AI-generated tracks I created using Stableaudio AI. One track explores ambient minimalism, while the other is a high-energy breakbeat.
+
+**Track 1:** *Meditative Ambient Soundscape*  
+- Tags: Ambient, Post-Rock, Minimalist, Reverb, 60 BPM
+
+**Track 2:** *Energetic Breakbeat Rave*  
+- Tags: Breakbeat, Acid Breaks, Chaotic, 135 BPM
+
+These were selected to reflect contrasting moods and musical energies—one calm and introspective, the other intense and rhythmic.
+
+
+
+As an Information Science student, both the world of computational music analysis and music production were fairly new to me at the start of this project. While I was familiar with working with data, exploring music through its features (like tempo, valence, or timbre) presented were entirely new.
+
+Starting off, I experimented with multiple AI music generators, but many of them felt too rigid or unpredictable. Eventually, I settled on Stableaudio AI for its detailed prompt control and more satisfying sonic results. My aim was to create two contrasting tracks: one calm and ambient, the other chaotic and energetic, so that I could explore the musical and data-level differences more clearly across various analytical features.
+
+Had I had more time or production experience, I would have loved to compose or produce my own music from scratch. However, given the time constraints and learning curve, using AI allowed me to focus more on the analytical side of this project so that the AI tracks could be used as case studies to compare both with each other and with the class corpus.
+
+---
+# AI-Generated Tracks
+
+
+For this project, I generated two original pieces of music using **Stableaudio AI** ([Stableaudio](https://stableaudio.com/generate)). My goal was to create two strongly contrasting tracks—one meditative and slow-paced, the other aggressive and heavier in terms of rhythm. This contrast helped me make more insightful comparisons when analyzing musical features across mood, energy, and structure.
+
+To shape each track, I wrote detailed prompts inspired by genre tags from **RateYourMusic.com**, including emotional and instrumental descriptors.
+
+
+**Track 1: Meditative Ambient Soundscape**
+
+**Style:** Ambient, Post-Rock, Cinematic  
+**Length:** 2 minutes  
+**Goal:** A calm, meditative ambient with minimal instrumentation.  
+
+**Tags Used:**  
+Ambient, Post-Rock, Cinematic, Ethereal, Soothing, Meditative, Minimalist, Warm Subtle Bass, Deep Drones, Airy Pads, Textures, Analog Synths, Field Recordings, Wind Sounds, Reverb, **60 BPM**
+---
+
+**Track 2: Energetic Breakbeat Rave**
+
+**Style:** Breakbeat, Acid Breaks, 90s Rave  
+**Length:** 2 minutes  
+**Goal:** A high-energy, chaotic breakbeat track.  
+
+**Tags Used:**  
+Breakbeat, Acid Breaks, 90s Rave, Energetic, Raw, Funky, Chaotic, Breakbeats, Deep Bass, Distorted 808, Acid Bass, Filtered Chords, Reversed Pads, Vocal Chops, **135 BPM**
+
+---
+
+**Track Creation**
+
+Creating the tracks involved three steps:
+
+1. **Prompt Design:**  
+   I began by exploring genre tags on RateYourMusic, collecting descriptors that captured the mood, instrumentation, and texture I wanted. I made sure to include detailed keywords around tempo, style, and sound design to give Stableaudio clear guidance.  
   
-  if (!is.null(tempogram)) {
-    print(
-      ggplot(tempogram, aes(x = time, y = bpm, fill = power)) +
-        geom_raster() +
-        scale_fill_viridis_c(guide = "none") +
-        labs(title = paste("Tempogram of", track), x = "Time (s)", y = "Tempo (BPM)") +
-        theme_classic()
-    )
-  }
-}
-```
+2. **Generation:**  
+I then entered these prompts into Stableaudio AI to generate multiple versions of each track. It took some trial and error to get the sonic qualities I envisioned, especially for the ambient piece, which some required subtlety in dynamics and space.
 
 
-Track 1: The first track, which is the ambient track, appears pretty uniform, smooth and continuous until the second minute, where it gets progressively broken up. This could be due to some subtle changes in the sound layers, while the song lacks a strong beat (as is often the case for ambient music).
+3. **Finalization:**  
+Once I had promising outputs, I evaluated them critically and overall judged the quality of several of my prompt outcomes. I selected the strongest versions, exported them as MP3s, and prepared them for analysis in this dashboard.
 
 
-
-Track 2: The second track, which is the breakbeat track, displays multiple evenly spaced lines. There is little variation visible aside from a small bridge, as the track mostly has a repetitive beat.
-
-
-
+With both tracks finalized the next step was to dive into the data, starting with an exploration of its features.
 
 ---
 
+# Explorative Visualization - Scatterplot
 
-# Chordogram - 
+To begin my analysis, I wanted a straightforward visualisation that would let me place my own tracks within the context of the class corpus. I chose a scatterplot because it clearly separates each data point, which helped me to  quickly identify how my tracks compare in terms of danceability and tempo, as these two features often shape the overall feel of a track.
 
+
+Below is a scatterplot of the Danceability compared to the Tempo of the tracks. My track 1 (ambient) is marked red, track 2 (breakbeat) is blue.
+
+```{r danceability_plot, echo=FALSE, fig.width=6, fig.height=4}
+dance_plot <- ggplot(compmus_data, aes(x = danceability, y = tempo, color = danceability, text = filename)) +
+  geom_point(alpha = 0.6, size = 2) +  
+  geom_point(data = compmus_data %>% filter(filename == "evan-l-1"), 
+             aes(x = danceability, y = tempo, text = filename), color = "red", size = 2.5) +
+  geom_point(data = compmus_data %>% filter(filename == "evan-l-2"), 
+             aes(x = danceability, y = tempo, text = filename), color = "blue", size = 2.5) +
+  
+  labs(title = "Danceability vs. Tempo",
+       x = "Danceability",
+       y = "Tempo",
+       color = "Danceability") +
+  
+  theme_classic()
+
+# Adjust plot size + hover tooltips show song titles
+ggplotly(dance_plot, tooltip = "text")
+```
+
+
+
+There appears to be no set correlation between the danceability and tempo of the tracks. However, an interesting pattern emerges: there are two clusters, one with low danceability, and another with high danceability, while the tempo does not differ much.
+
+Regarding my own tracks:
+
+- The **calm ambient track** has an average tempo and low danceability.
+- The **breakbeat song** has an average tempo but high danceability.
+
+One particularly surprising observation is how the AI interpreted the second song’s tempo. While I set it to **135 BPM**, it was classified as **93 BPM**. This suggests that the AI might have emphasized a different rhythmic structure or half-time feel in its classification.
+
+Overall, the plot allowed me to see individual track positions and emerging clusters. As visible here, there’s a group of tracks with low danceability and another with high danceability, while tempo remains relatively consistent across both clusters. This helped me gain more perspective into where my own tracks 'live' compared to the others, which created a solid mental foundation for further explorations.
 
 
 ---
@@ -117,11 +176,18 @@ Track 2: The second track, which is the breakbeat track, displays multiple evenl
 # Chromagram
 
 ## Chromagrams for own tracks
+Before diving into the analysis, it's helpful to briefly explain what a chromagram is.
+A chromagram is a visual representation of harmonic content in music. It maps audio to the 12 pitch classes (C, C#, D, ..., B), showing how energy is distributed across pitches over time, regardless of octave. This is especially useful when analyzing chord progressions, tonality, or harmonic density.
 
-**!!! I currently keep having issues with my chromagrams not loading (though they do show in R), so it may be that they don't show up yet. Trying to fix this ASAP.**
 
+## Technical Issues
 
-Chromagrams capture the harmonic content by showing how energy is distributed across the 12 pitch classes over time.
+Creating these chromagrams proved to be a bit of a journey for me. I initially struggled because I missed the session where we were introduced to the compmus.R helper file. As I did not know it existed, I tried calculating chromagrams (and later, self-similarity matrices) using external packages like tuneR and seewave.
+
+Eventually, I did manage to get my plots working, though it took a lot of trial and error. Even after discovering the compmus.R file, I ran into some persistent bugs, possibly due to updates to the helper functions or conflicts in how I had structured my analysis. For now, I’ve kept my original chromagram approach intact, since it renders reliably in R.
+
+One thing I did notice was how the resulting spectrograms could benefit from better log-frequency mapping. Without it, the lower frequencies, especially in my ambient track, appear faint or almost non-existent. This is a fair reflection though, as the track is meant to be minimal and quiet.
+
 
 ```{r chromagrams, echo=FALSE}
 #currently has issues loading.. why?
@@ -139,17 +205,44 @@ par(mfrow = c(2,1))
 plot_chromagram("evan-l-1.wav")
 plot_chromagram("evan-l-2.wav")
 ```
-- **Evan-l-1.wav - Ambient **
-  - The energy is mainly in the lower frequency range, below ~5 kHz
-  - The overall amplitude is low, this reflects the quiet ambient sounds
-  - The minimal structure suggests an ambient or instrumental track
+## Chromagram Results
 
-- **Evan-l-2.wav - Breakbeat **
-  - Covers a much wider frequency range, reaching beyond 10 kHz, with distinct variations in energy
-  - Brighter colors indicate stronger amplitude, due to the track being comparatively dynamic
-  - The structure implies prominent rhythmic and melodic elements, as is the case with my breakbeat track
+
+**Track 1 — Evan-l-1.wav (Ambient):**
+
+Energy is concentrated in the lower frequency range (below ~5 kHz)
+
+The overall amplitude is low, reflecting the sparse, ambient atmosphere
+
+The structure is fluid and minimal, with little rhythmic emphasis
+
+
+
+
+**Track 2 — Evan-l-2.wav (Breakbeat)**
+
+Frequency content spans a much wider range, reaching above 10 kHz
+
+Brighter colors indicate greater amplitude and more harmonic variation
+
+Suggests a more rhythmic, melodic, and dynamic structure, consistent with breakbeat styles
+
+
+So, although the chromagram for the ambient track appears faint and minimal, this is true to the source material which was designed to be slow, textured, and atmospheric. In contrast, the breakbeat track is vibrant and information-dense, with sharper contrasts and more visible harmonic shifts.
+
+Overall, the chromagrams helped me visually confirm the core differences I aimed for between these two pieces, which is the perceived strength of sound, as one track is quiet and soft while the other is loud and intense.
 
 ---
+
+# Self Similarity Matrices
+
+After exploring harmonic content through chromagrams, I turned to self-similarity matrices (SSMs) to better understand the internal structure of my two tracks.
+
+SSMs compare every moment in a song with every other moment, based on chosen features like chroma or timbre. This creates a square matrix where repeated or similar sections appear as distinct patterns—such as diagonal lines (repetitions), blocks (sections), or checkerboards (alternating segments). They're very useful for spotting structural repetition, dynamic contrast, and transitions that might not be immediately audible.
+
+Within the context of my musical exploration these SSMs helped me explore how much variety or repetition exists in my tracks—and whether those patterns aligned with what I intended in the composition prompts.
+As with the chromagrams, I used external packages to generate my self-similarity matrices (tuneR, seewave, and melfcc() from phonTools). Luckily, the output remains clear and useful, even if slightly stylistically different from the class standard.
+
 
 
 ```{r self_similarity, echo=FALSE}
@@ -183,90 +276,253 @@ image(ssm_chroma_2, main = "Chroma SSM - Evan-l-2.wav", col = gray.colors(100))
 image(ssm_timbre_2, main = "Timbre SSM - Evan-l-2.wav", col = gray.colors(100))
 ```
 
-## SSMs
+## SSM Interpretation
+
+- **Evan-l-1.wav - Ambient**
+  - The chroma SSM is fairly uniform, with only mild internal variation. This fits the track’s ambient purpose: minimal harmonic shifts and slow movement.
+  - The timbre SSM is smooth and almost static, reflecting the consistent use of textures and sparse instrumentation.
+
+- **Evan-l-2.wav - Breakbeat**
+  - The chroma SSM features a checkerboard-like structure, which suggests the presence alternating harmonic material or call-and-response phrasing.This is apparently typical of fast-paced breakbeat.
+  - The timbre SSM shows greater diversity and shifting textures, likely due to drum fills, chopped vocal samples, and synthesized layers that I requested in my prompt.
+
+
+Despite being AI-generated, both tracks exhibit recognizable structural patterns that align with their intended genres. The ambient track relies on repetition and slow shifts, while the breakbeat track emphasizes variety and rhythmic segmentation. These SSMs were one of the clearest visual confirmations of that difference.
+
+
+---
+
+# Chordo/Keygram - Visualizing the keys
+
+Chordograms offer a great way to visualize how harmonic templates such as keys align with the audio over time. They are derived from chroma features, but rather than showing raw pitch-class energy, they show how closely the signal matches known musical templates like major/minor chords.
+
+For this step, I finally managed to use the class’s compmus.R functions after struggling initially with the wrong feature format. Now that I had access to my .json chroma features, I could apply the pitch matching function. I wanted to generate keygrams to better understand the tonal content of each track. Since both songs belong to abstract or electronic genres—ambient and breakbeat, it wasn’t obvious what key either was in just by listening. So, a visualisation of harmonic similarity across key templates offered an analytical alternative.
+
+
+I used the 'viridis' colour scale, in which darker colours imply a stronger presence, while lighter colours indicate absence.
+
+
+```{r chordogram, echo=FALSE}
+# Chordogram for Track 1
+chordogram_1 <- 
+  "features/evan-l-1.json" |> 
+  compmus_chroma(norm = "identity") |> 
+  compmus_match_pitch_templates(
+    chord_templates,
+    norm = "identity",
+    distance = "cosine"
+  ) |> 
+  ggplot(aes(x = time, y = name, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(title = "Chordogram – Evan-l-1 (Ambient)", x = "Time (s)", y = "Chord") +
+  theme_classic()
+
+print(chordogram_1)
+
+
+# Chordogram for Track 2
+chordogram_2 <- 
+  "features/evan-l-2.json" |> 
+  compmus_chroma(norm = "identity") |> 
+  compmus_match_pitch_templates(
+    chord_templates,
+    norm = "identity",
+    distance = "cosine"
+  ) |> 
+  ggplot(aes(x = time, y = name, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(title = "Chordogram – Evan-l-2 (Breakbeat)", x = "Time (s)", y = "Chord") +
+  theme_classic()
+
+print(chordogram_2)
+
+```
+## Keygram Interpretation
+
+- **Evan-l-1.wav - Ambient**
+  - The ambient piece exhibits extensive key ambiguity—most pitch classes (keys) are present to some degree.
+  - The F♯ key shows a strong, consistent presence throughout the entire track, so it might serve as a tonal center.
+  - Notably, B and A♯ are nearly absent, as are G/E/C which could imply intentional exclusion or simply a lack of harmonic content in those registers
+  - The blurred, smooth transitions between chords match what one might expect from an ambient texture—low harmonic rhythm, lots of overlap, and little definitive resolution.
+
+
+
+- **Evan-l-2.wav - Breakbeat**
+  - The breakbeat track is far more rhythmically and harmonically active than the ambient track, as its keygram is much more dynamic
+  - Most striking is the clear modulation or key shift around 30 seconds in—D♯ and E gain dominance, where earlier they were barely present. This aligns with a mid-track 'build-up' or drop, common in breakbeat and rave genres.
+  - The activity is highly dynamic and colorful, which reflects the energetic and intense piece of music.
+  - Compared to the ambient track, this piece cycles through multiple harmonic centers, yet doesn’t dwell on any one key for long.
+
+
+Conclusively, the ambient track displays strong harmonic minimalism, while the breakbeat track displays harmonic variability. It is interesting how both of these reflect their respective genre conventions, and how it would be easy to tell which track is which from the keygrams alone.
+
+
+
+---
+
+# Tempograms - Analysis of tempo structure
+
+
+
+## Histogram for tempo class corpus
+Before analyzing my own tracks' tempo structures in detail, I first wanted to understand how tempo is distributed across the entire class corpus. My goal was to see where my own AI-generated tracks might fit within the broader spectrum of musical pacing in the dataset.
+
+To do this I chose to visualize the tempo of each track using a histogram. A bar plot is one of the most straightforward ways to represent frequency distributions, and in this context, it clearly displays which tempos are most common in the class corpus. I also used Plotly to make the plot interactive, so individual tempo bins can be hovered over to reveal exact values.
+
+
+```{r tempo_analysis, echo=FALSE}
+# Histogram of tempo for the class corpus
+plotly::ggplotly(
+compmus_data %>%
+  ggplot(aes(x = tempo)) +
+  geom_histogram(binwidth = 5, fill = "blue", color = "black") +
+  theme_minimal() +
+  labs(title = "Histogram of Tempo - Class", x = "Tempo (BPM)", y = "Count")
+)
+```
+
+From the histogram, we can see that the most frequent tempo (mode) in the class corpus is 85 BPM, with a count of 16 tracks. This relatively slow pace is commonly associated with genres like hip-hop, downtempo electronic, or ballads—genres that often center around groove or mood rather than rapid movement. It also aligns roughly with the human resting heart rate, which may contribute to its perceived 'naturalness'.
+
+The tempo distribution also shows smaller peaks in higher ranges, this could hint at clusters of tracks with faster or more danceable tempos like those found in house, pop, or techno.
+
+---
+
+## Tempograms for own songs
+
+
+After establishing the previous benchmark, I visualized the tempograms of my two AI-generated songs. These tempograms are generated from the JSON feature files and show how rhythmic intensity evolves over the duration of each track.
+
+
+```{r tempograms, echo=FALSE}
+# Generate tempograms for user contributions
+for (track in json_my_tracks) {
+  tempogram <- tryCatch({
+    compmus_tempogram(track, window_size = 8, hop_size = 1, cyclic = FALSE)
+  }, error = function(e) {
+    message(paste("Error processing file:", track))
+    return(NULL)
+  })
+  
+  if (!is.null(tempogram)) {
+    print(
+      ggplot(tempogram, aes(x = time, y = bpm, fill = power)) +
+        geom_raster() +
+        scale_fill_viridis_c(guide = "none") +
+        labs(title = paste("Tempogram of", track), x = "Time (s)", y = "Tempo (BPM)") +
+        theme_classic()
+    )
+  }
+}
+```
+
+
 
 
 - **Evan-l-1.wav - Ambient**
-  - The chroma-SSM shows some variation, but overall pretty uniform and repetitive
-  - The timbre-SSM is mostly smooth and table
+  - The tempogram is fairly uniform and flat for the first half. This is consistent with how smooth and uniform the track is.
+  - Around the 60-second mark, the regularity begins to break down, and we observe some fragmentation and drift in the tempo bands. This showcases the more layered elements that are audible in this track, such as the addition of audio tape samples.
+
+
 
 - **Evan-l-2.wav - Breakbeat**
-  - The chroma-SSM has more distinct patterns, like a checkerboard. The song has stronger harmonic changes with varied chord progressions.
-  - The timbre-SSM shows greater shifts in instruments or timbres
+  - This track displays clearly defined, horizontal tempo bands, which indicates a steady and repetitive beat.
+  - The multiple stacked lines reflect regular subdivisions (ex: half-time, double-time) which is usual in breakbeat and rave music.
+  - The activity is highly dynamic and colorful, which reflects the energetic and intense piece of music.
+  - There’s a minor disturbance just past the halfway point—likely a bridge or breakdown before returning to the core rhythmic pattern.
+
+
+Comparing these tempograms visually strengthens the contrast in structure between my two tracks. The ambient piece is loosely timed, smooth, and much more textural, while the breakbeat track is rigid, fast-paced, and driven by its beat. This rhythmic contrast further supports what was established in earlier keygrams and SSMs, as each track is clearly distinct in both feel and temporal organization.
 
 
 ---
+# Dendrogram
 
-# AI-Generated Tracks
 
-These tracks were created using **Stableaudio AI** ([Stableaudio](https://stableaudio.com/generate)). I took inspiration from genre tags on **RateYourMusic** and carefully crafted prompts using detailed descriptors to shape the sound. After generating the tracks, I simply downloaded the MP3 files.
+To finalize my feature exploration I wanted to visualize how different tracks group together based on their musical characteristics. Dendrograms, which visualize hierarchical clustering, are perfect for this kind of exploratory analysis: They show the relative similarity between tracks and form clusters where songs with similar musical features are grouped closer together.
 
-**Track 1: Meditative Ambient Soundscape**
+## Hierarchical clustering on class corpus
 
-**Style:** Ambient, Post-Rock, Cinematic  
-**Length:** 2 minutes  
-**Goal:** A calm, meditative ambient with minimal instrumentation.  
+I began by creating a dendrogram based on five track-level features: valence, arousal, danceability, tempo, and instrumentalness. This was mainly exploratory to give me a sense of how different the tracks in our class corpus really are when analyzed together.
 
-**Tags Used:**  
-Ambient, Post-Rock, Cinematic, Ethereal, Soothing, Meditative, Minimalist, Warm Subtle Bass, Deep Drones, Airy Pads, Textures, Analog Synths, Field Recordings, Wind Sounds, Reverb, **60 BPM**
----
+```{r clustering_dendrogram, echo=FALSE}
 
-**Track 2: Energetic Breakbeat Rave**
+# Prepping the data
+cluster_juice <-
+  recipe(
+    filename ~ arousal + danceability + instrumentalness + tempo + valence,
+    data = compmus_data
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors()) |> 
+  prep(compmus_data) |>
+  juice() |>
+  column_to_rownames("filename")
 
-**Style:** Breakbeat, Acid Breaks, 90s Rave  
-**Length:** 2 minutes  
-**Goal:** A high-energy, chaotic breakbeat track.  
+compmus_dist <- dist(cluster_juice, method = "euclidean")
 
-**Tags Used:**  
-Breakbeat, Acid Breaks, 90s Rave, Energetic, Raw, Funky, Chaotic, Breakbeats, Deep Bass, Distorted 808, Acid Bass, Filtered Chords, Reversed Pads, Vocal Chops, **135 BPM**
-
----
-
-**Track Creation**
-
-1. **Prompt Design:**  
-   - Used RateYourMusic to explore fitting **genre tags**.  
-   - Structured prompts with **specific instruments, moods, and BPM** to guide the AI.  
-2. **Generation:**  
-   - Entered prompts into **Stableaudio AI**.  
-   - Experimented with variations before selecting the best versions.  
-3. **Finalization:**  
-   - Downloaded the **MP3 files** and ensured they matched my vision.  =
-
----
-
-# Visualization
-
-Here's a scatterplot of the Danceability compared to the Tempo of the tracks. My track 1 (ambient) is marked red, track 2 (breakbeat) is blue.
-
-```{r danceability_plot, echo=FALSE, fig.width=6, fig.height=4}
-dance_plot <- ggplot(compmus_data, aes(x = danceability, y = tempo, color = danceability, text = filename)) +
-  geom_point(alpha = 0.6, size = 2) +  
-  geom_point(data = compmus_data %>% filter(filename == "evan-l-1"), 
-             aes(x = danceability, y = tempo, text = filename), color = "red", size = 2.5) +
-  geom_point(data = compmus_data %>% filter(filename == "evan-l-2"), 
-             aes(x = danceability, y = tempo, text = filename), color = "blue", size = 2.5) +
-  
-  labs(title = "Danceability vs. Tempo",
-       x = "Danceability",
-       y = "Tempo",
-       color = "Danceability") +
-  
-  theme_classic()
-
-# Adjust plot size + hover tooltips show song titles
-ggplotly(dance_plot, tooltip = "text")
+# Dendrogram Plot
+compmus_dist |> 
+  hclust(method = "average") |> 
+  dendro_data() |>
+  ggdendrogram() +
+  labs(title = "Dendrogram of Class Corpus", y = "Distance") +
+  theme_minimal()
 ```
+This general dendrogram already shows some distinct clustering patterns, although it's based on a broader set of features.
+
+
+## Hierarchical clustering on own tracks - Mood-based clustering
+
+Since my two AI-generated tracks are drastically different in energy and mood, I wanted to focus more directly on clustering the corpus based on the emotional and rhythmic character of each song. For this, I narrowed it down to just valence, arousal and tempo.
+
+
+```{r clustering_mood_only, echo=FALSE}
+mood_cluster <-
+  recipe(
+    filename ~ valence + arousal + tempo,
+    data = compmus_data
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors()) |> 
+  prep(compmus_data) |>
+  juice() |>
+  column_to_rownames("filename")
+
+mood_dist <- dist(mood_cluster, method = "euclidean")
+mood_hclust <- hclust(mood_dist, method = "average")
+
+# Plot alternative dendrogram based on mood features only
+ggdendrogram(mood_hclust, rotate = FALSE, theme_dendro = FALSE) +
+  labs(
+    title = "Dendrogram of Chill vs. Energetic Music",
+    subtitle = "Valence + Arousal + Tempo",
+    x = "Tracks",
+    y = "Distance"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    axis.ticks.x = element_blank()
+  )
+```
+
+In this mood-based dendrogram, tracks that cluster lower tend to be more similar in emotional character. In this case, that often means relaxed, calm, or lo-fi — including my ambient track. My breakbeat track, on the other hand, clusters higher up, which indicates that it’s more distinct and intense in mood and energy.
+
+To conclude, this dendrograms pattern aligns reasonably well with my own two tracks. My ambient piece is grouped low in the dendrogram, nestled among similarly relaxed tracks. Meanwhile, the breakbeat track is positioned much higher, reflecting its chaotic energy and rhythmic aggression. Seeing this contrast play out in the structure of the dendrogram was especially satisfying as it served as a visualization for something that is often only describable as a 'vibe' or 'energy', now being measurably present in the data.
 
 ---
 
 # Final Thoughts
 
-There appears to be no set correlation between the danceability and tempo of the tracks. However, an interesting pattern emerges: there are two clusters—one with low danceability, and another with high danceability, while the tempo does not differ much.
+Coming into this project without a strong background in either computational analysis or musicology, I wasn’t entirely sure what to expect. My experience with R was minimal and limited to a single data science course two years ago, and my musical understanding was more intuitive than technical. But working through this analysis gave me a surprisingly rich perspective on how musical qualities manifest in data.
 
-Regarding my own tracks:
+What stood out to me the most was seeing the contrast between my two AI-generated tracks unfold across each visualization. Because the tracks were intentionally so different (one ambient and meditative, the other energetic and chaotic) the distinctions were clear, which made it much easier to understand what each method was actually showing.
 
-- The **calm ambient track** has an average tempo and low danceability.
-- The **breakbeat song** has an average tempo but high danceability.
+Whether looking at chromagrams, self-similarity matrices, or keygrams, I could begin to interpret the visuals in a way that matched what I had heard intuitively. Even moments like sensing a key shift without knowing the actual notes, only to see that shift appear in the analysis, helped recontextualize how I listen to music altogether. It felt like learning a new language which allowed me to describe and understand music in ways I couldn’t before.
 
-One particularly surprising observation is how the AI interpreted the second song’s tempo. While I set it to **135 BPM**, it was classified as **93 BPM**. This suggests that the AI might have emphasized a different rhythmic structure or half-time feel in its classification.
+This kind of process could be especially valuable for beginners in musicological analysis, particularly those exploring electronic instrumental music. The contrast between tracks, when made visual, becomes a powerful learning tool. My own analysis could serve as a way to better understand these features for other 'compmus beginners' as well. Being able to see harmony, rhythm, structure, and energy not only supports deeper listening, but also helps bridge the gap between abstract sound and analytical clarity.
+
+
+
